@@ -1,0 +1,9 @@
+libdir=@out@/lib
+includedir=@dev@/include
+
+Name: lightning
+Description: Lightning In-Memory Object Store
+URL: https://github.com/nwtnni/lightning
+Version: 0.1.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -llightning
