@@ -142,10 +142,9 @@ LightningClient::LightningClient(const std::string &store_socket,
     exit(-1);
   }
 
-  base_ = (uint8_t *)0xabcd000;
-
-  header_ = (LightningStoreHeader *)mmap((void *)base_, size_, PROT_WRITE,
-                                         MAP_SHARED | MAP_FIXED, store_fd_, 0);
+  header_ = (LightningStoreHeader *)mmap(nullptr, size_, PROT_WRITE, MAP_SHARED,
+                                         store_fd_, 0);
+  base_ = (uint8_t *)header_;
 
   if (header_ != (LightningStoreHeader *)base_) {
     perror("mmap failed");

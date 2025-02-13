@@ -79,9 +79,8 @@ LightningStore::LightningStore(const char *path, const std::string &unix_socket,
     perror("cannot ftruncate");
     exit(-1);
   }
-  store_header_ =
-      (LightningStoreHeader *)mmap((void *)0xabcd000, size, PROT_WRITE,
-                                   MAP_SHARED | MAP_FIXED, store_fd_, 0);
+  store_header_ = (LightningStoreHeader *)mmap(nullptr, size, PROT_WRITE,
+                                               MAP_SHARED, store_fd_, 0);
   if (store_header_ == (LightningStoreHeader *)-1) {
     perror("mmap failed");
     exit(-1);
@@ -140,13 +139,11 @@ void LightningStore::SetRoot(void *pointer) {
 }
 
 sm_offset LightningStore::PointerToOffset(void *pointer) {
-  auto base_ = 0xabcd000;
-  return ((sm_offset)pointer - base_);
+  return ((sm_offset)pointer - (sm_offset)store_header_);
 }
 
 void *LightningStore::OffsetToPointer(sm_offset offset) {
-  auto base_ = 0xabcd000;
-  return (void *)(base_ + offset);
+  return (void *)((sm_offset)store_header_ + offset);
 }
 
 sm_offset LightningStore::Malloc(uint64_t id, size_t size) {
