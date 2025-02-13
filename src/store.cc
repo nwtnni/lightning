@@ -193,8 +193,11 @@ void LightningStore::recover(uint8_t *base, uint8_t *log, uint8_t *object_log,
       }
     }
   } else {
-    while (!__sync_bool_compare_and_swap(&store_header_->lock_flag, 0, 1)) {
-      nanosleep((const struct timespec[]){{0, 0L}}, NULL);
+    auto out = 0;
+    while (!store_header_->lock_flag.compare_exchange_strong(
+        out, 1, std::memory_order_acq_rel, std::memory_order_acquire)) {
+      out = 0;
+      nanosleep((const struct timespec[]){{0, 0L}}, nullptr);
     }
   }
 

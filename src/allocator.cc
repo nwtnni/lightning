@@ -1,3 +1,4 @@
+#include <atomic>
 #include <ctime>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -7,13 +8,16 @@
 #include "object_log.h"
 
 #define LOCK                                                                   \
-  while (!__sync_bool_compare_and_swap(&store_header_->lock_flag, 0, id)) {    \
-    nanosleep((const struct timespec[]){{0, 0L}}, nullptr);                    \
-  }
+  do {                                                                         \
+    auto out = 0;                                                              \
+    while (!store_header_->lock_flag.compare_exchange_strong(                  \
+        out, id, std::memory_order_acq_rel, std::memory_order_acquire)) {      \
+      out = 0;                                                                 \
+      nanosleep((const struct timespec[]){{0, 0L}}, nullptr);                  \
+    }                                                                          \
+  } while (0);
 
-#define UNLOCK                                                                 \
-  std::atomic_thread_fence(std::memory_order_release);                         \
-  store_header_->lock_flag = 0
+#define UNLOCK store_header_->lock_flag.store(0, std::memory_order_release)
 
 LightningAllocator::LightningAllocator(const char *path, size_t size)
     : size_(size) {

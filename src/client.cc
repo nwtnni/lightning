@@ -1,11 +1,9 @@
 #include <assert.h>
 #include <atomic>
-#include <chrono>
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
 #include <mutex>
-#include <signal.h>
 #include <stdlib.h>
 #include <string>
 #include <sys/mman.h>
@@ -24,13 +22,16 @@ static int pkey_ = -1;
 static std::mutex pkey_lock_;
 
 #define LOCK                                                                   \
-  while (!__sync_bool_compare_and_swap(&header_->lock_flag, 0, pid_)) {        \
-    nanosleep((const struct timespec[]){{0, 0L}}, NULL);                       \
-  }
+  do {                                                                         \
+    auto out = 0;                                                              \
+    while (!header_->lock_flag.compare_exchange_strong(                        \
+        out, pid_, std::memory_order_acq_rel, std::memory_order_acquire)) {    \
+      out = 0;                                                                 \
+      nanosleep((const struct timespec[]){{0, 0L}}, nullptr);                  \
+    }                                                                          \
+  } while (0);
 
-#define UNLOCK                                                                 \
-  std::atomic_thread_fence(std::memory_order_release);                         \
-  header_->lock_flag = 0
+#define UNLOCK header_->lock_flag.store(0, std::memory_order_release)
 
 int recv_fd(int unix_sock) {
   ssize_t size;
