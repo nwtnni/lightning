@@ -56,24 +56,9 @@ LightningAllocator::LightningAllocator(const char *path, size_t size)
 }
 
 void LightningAllocator::Initialize() {
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
-    store_header_->memory_entries[i].free_list_next = i + 1;
-  }
-  store_header_->memory_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
-
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
-    store_header_->object_entries[i].free_list_next = i + 1;
-  }
-  store_header_->object_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
-
   int num_mpk_pages = sizeof(LightningStoreHeader) / 4096 + 1;
   int64_t secure_memory_size = num_mpk_pages * 4096;
-
   allocator_->Init(secure_memory_size, size_ - secure_memory_size);
-
-  for (int i = 0; i < HASHMAP_SIZE; i++) {
-    store_header_->hashmap.hash_entries[i].object_list = -1;
-  }
 }
 
 void *LightningAllocator::GetRoot() {
