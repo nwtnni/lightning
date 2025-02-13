@@ -15,6 +15,8 @@ public:
   LightningStore(const char *path, int size);
   void Run();
 
+  void *GetRoot();
+  void SetRoot(void *pointer);
   void *OffsetToPointer(sm_offset offset);
   sm_offset PointerToOffset(void *pointer);
   sm_offset Malloc(uint64_t id, size_t size);

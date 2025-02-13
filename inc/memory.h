@@ -63,6 +63,7 @@ struct HashMap {
 
 struct LightningStoreHeader {
   volatile int lock_flag = 0;
+  std::atomic<sm_offset> root;
   MemoryEntry memory_entries[MAX_NUM_OBJECTS];
   ObjectEntry object_entries[MAX_NUM_OBJECTS];
   int64_t memory_entry_free_list;

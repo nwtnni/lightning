@@ -133,6 +133,19 @@ LightningStore::LightningStore(const char *path, const std::string &unix_socket,
   std::atomic_thread_fence(std::memory_order_release);                         \
   store_header_->lock_flag = 0
 
+void *LightningStore::GetRoot() {
+  sm_offset root = store_header_->root.load();
+  if (root == 0) {
+    return nullptr;
+  } else {
+    return OffsetToPointer(root);
+  }
+}
+
+void LightningStore::SetRoot(void *pointer) {
+  store_header_->root.store(PointerToOffset(pointer));
+}
+
 sm_offset LightningStore::PointerToOffset(void *pointer) {
   auto base_ = 0xabcd000;
   return ((sm_offset)pointer - base_);
