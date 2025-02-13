@@ -37,25 +37,7 @@ LightningAllocator::LightningAllocator(const char *path, size_t size)
     exit(-1);
   }
 
-  auto pid = getpid();
-  auto pid_str = "object-log-" + std::to_string(pid);
   size_t object_log_size = sizeof(LogObjectEntry) * OBJECT_LOG_SIZE;
-  auto object_log_fd = shm_open(pid_str.c_str(), O_CREAT | O_RDWR, 0666);
-
-  status = ftruncate(object_log_fd, object_log_size);
-  if (status < 0) {
-    perror("cannot ftruncate");
-    exit(-1);
-  }
-
-  auto object_log_base_ =
-      (uint8_t *)mmap(nullptr, object_log_size, PROT_READ | PROT_WRITE,
-                      MAP_SHARED, object_log_fd, 0);
-  if (object_log_base_ == (uint8_t *)-1) {
-    perror("mmap failed");
-    exit(-1);
-  }
-
   auto disk = new UndoLogDisk(1024 * 1024 * 10, (uint8_t *)store_header_,
                               size + object_log_size);
   allocator_ = new MemAllocator(store_header_, disk);
