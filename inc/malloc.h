@@ -17,6 +17,9 @@ public:
   // for crash recovery
   void FreeSharedNoLog(sm_offset offset);
 
+  void BeginTx();
+  void CommitTx();
+
 private:
   void split_memory_to_free_lists(sm_offset offset, size_t size);
   int64_t create_block(sm_offset ptr, size_t size);

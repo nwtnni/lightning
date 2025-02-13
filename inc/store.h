@@ -13,6 +13,11 @@ public:
   LightningStore(const std::string &unix_socket, int size);
   void Run();
 
+  void *OffsetToPointer(sm_offset offset);
+  sm_offset PointerToOffset(void *pointer);
+  sm_offset Malloc(uint64_t id, size_t size);
+  void Free(uint64_t id, sm_offset offset);
+
 private:
   void monitor();
   void listener();

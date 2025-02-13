@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "log_disk.h"
+#include "memory.h"
 #include "object_log.h"
 #include "store.h"
 
@@ -113,6 +114,42 @@ LightningStore::LightningStore(const std::string &unix_socket, int size)
   for (int i = 0; i < HASHMAP_SIZE; i++) {
     store_header_->hashmap.hash_entries[i].object_list = -1;
   }
+}
+
+#define LOCK                                                                   \
+  while (!__sync_bool_compare_and_swap(&store_header_->lock_flag, 0, id)) {    \
+    nanosleep((const struct timespec[]){{0, 0L}}, NULL);                       \
+  }
+
+#define UNLOCK                                                                 \
+  std::atomic_thread_fence(std::memory_order_release);                         \
+  store_header_->lock_flag = 0
+
+sm_offset LightningStore::PointerToOffset(void *pointer) {
+  auto base_ = 0xabcd000;
+  return ((sm_offset)pointer - base_);
+}
+
+void *LightningStore::OffsetToPointer(sm_offset offset) {
+  auto base_ = 0xabcd000;
+  return (void *)(base_ + offset);
+}
+
+sm_offset LightningStore::Malloc(uint64_t id, size_t size) {
+  LOCK;
+  allocator_->BeginTx();
+  sm_offset pointer = allocator_->MallocShared(size);
+  allocator_->CommitTx();
+  UNLOCK;
+  return pointer;
+}
+
+void LightningStore::Free(uint64_t id, sm_offset offset) {
+  LOCK;
+  allocator_->BeginTx();
+  allocator_->FreeShared(offset);
+  allocator_->CommitTx();
+  UNLOCK;
 }
 
 int64_t LightningStore::find_object(uint64_t object_id) {

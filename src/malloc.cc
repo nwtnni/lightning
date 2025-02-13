@@ -554,3 +554,6 @@ void MemAllocator::FreeSharedNoLog(sm_offset offset) {
 
   add_to_free_list_nolog(MAXIMUM_BLOCK_SIZE_LOG, mem_entry_index);
 }
+
+void MemAllocator::BeginTx() { disk_->BeginTx(); }
+void MemAllocator::CommitTx() { disk_->CommitTx(); }
