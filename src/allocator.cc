@@ -7,11 +7,13 @@
 #include "allocator.h"
 #include "object_log.h"
 
+// Note: original system uses process IDs, which are non-zero, but the
+// allocator benchmark uses thread IDs starting from zero.
 #define LOCK                                                                   \
   do {                                                                         \
     auto out = 0;                                                              \
     while (!store_header_->lock_flag.compare_exchange_strong(                  \
-        out, id, std::memory_order_acq_rel, std::memory_order_acquire)) {      \
+        out, id + 1, std::memory_order_acq_rel, std::memory_order_acquire)) {  \
       out = 0;                                                                 \
       nanosleep((const struct timespec[]){{0, 0L}}, nullptr);                  \
     }                                                                          \
