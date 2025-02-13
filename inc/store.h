@@ -12,6 +12,7 @@
 class LightningStore {
 public:
   LightningStore(const std::string &unix_socket, int size);
+  LightningStore(const char *path, int size);
   void Run();
 
   void *OffsetToPointer(sm_offset offset);
@@ -20,6 +21,7 @@ public:
   void Free(uint64_t id, sm_offset offset);
 
 private:
+  LightningStore(const char *path, const std::string &unix_socket, int size);
   void monitor();
   void listener();
 

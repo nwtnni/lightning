@@ -72,8 +72,15 @@ int send_fd(int unix_sock, int fd) {
 }
 
 LightningStore::LightningStore(const std::string &unix_socket, int size)
+    : LightningStore(name, unix_socket, size) {}
+
+LightningStore::LightningStore(const char *path, int size)
+    : LightningStore(path, "", size) {}
+
+LightningStore::LightningStore(const char *path, const std::string &unix_socket,
+                               int size)
     : unix_socket_(unix_socket), size_(size) {
-  store_fd_ = shm_open(name, O_CREAT | O_RDWR, 0666);
+  store_fd_ = shm_open(path, O_CREAT | O_RDWR, 0666);
   int status = ftruncate(store_fd_, size);
   if (status < 0) {
     perror("cannot ftruncate");
@@ -87,7 +94,8 @@ LightningStore::LightningStore(const std::string &unix_socket, int size)
     exit(-1);
   }
 
-  shm_unlink(name);
+  // Leave path exposed
+  // shm_unlink(path);
 
   std::cout << "store_header_ = " << (unsigned long)store_header_ << std::endl;
 
