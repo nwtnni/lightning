@@ -42,12 +42,10 @@ LightningAllocator::LightningAllocator(const char *path, size_t size)
     exit(-1);
   }
 
-  uint8_t *object_log_base = (uint8_t *)store_header_ + size;
   auto object_log_base_ =
-      (uint8_t *)mmap(object_log_base, object_log_size, PROT_READ | PROT_WRITE,
-                      MAP_SHARED | MAP_FIXED, object_log_fd, 0);
-
-  if (object_log_base_ != object_log_base) {
+      (uint8_t *)mmap(nullptr, object_log_size, PROT_READ | PROT_WRITE,
+                      MAP_SHARED, object_log_fd, 0);
+  if (object_log_base_ == (uint8_t *)-1) {
     perror("mmap failed");
     exit(-1);
   }
