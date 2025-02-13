@@ -3,7 +3,6 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <iostream>
-#include <signal.h>
 #include <stdlib.h>
 #include <string>
 #include <sys/mman.h>
@@ -14,7 +13,6 @@
 #include <thread>
 #include <unistd.h>
 #include <unordered_set>
-#include <vector>
 
 #include "log_disk.h"
 #include "memory.h"
@@ -22,11 +20,6 @@
 #include "store.h"
 
 const char *name = "lightning";
-
-void signal_handler(int sig_number) {
-  std::cout << "Capture Ctrl+C" << std::endl;
-  exit(0);
-}
 
 int send_fd(int unix_sock, int fd) {
   ssize_t size;
@@ -563,16 +556,4 @@ void LightningStore::Run() {
   std::thread listener_thread = std::thread(&LightningStore::listener, this);
   listener_thread.join();
   monitor_thread.join();
-}
-
-int main() {
-  if (signal(SIGINT, signal_handler) == SIG_ERR) {
-    std::cerr << "cannot register signal handler!" << std::endl;
-    exit(-1);
-  }
-
-  LightningStore store("/tmp/lightning", 1024 * 1024 * 1024);
-  store.Run();
-
-  return 0;
 }

@@ -17,12 +17,13 @@ file(GLOB LIB_SRC
   "${SRC_DIR}/log_disk.cc"
   "${SRC_DIR}/malloc.cc"
   "${SRC_DIR}/object_log.cc"
+  "${SRC_DIR}/store.cc"
 )
 
 add_library(lightning STATIC ${LIB_SRC})
 target_link_libraries(lightning "-lrt -lpthread")
 
-add_executable(store "${SRC_DIR}/store.cc")
+add_executable(store "${SRC_DIR}/server.cc")
 target_link_libraries(store lightning)
 
 file(GLOB TEST_SRC
