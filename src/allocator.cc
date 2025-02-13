@@ -59,7 +59,9 @@ LightningAllocator::LightningAllocator(const char *path, size_t size)
   allocator_ = new MemAllocator(store_header_, disk);
 }
 
-void LightningAllocator::Initialize() {
+void LightningAllocator::Initialize(uint64_t id) {
+  LOCK;
+
   for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
     store_header_->memory_entries[i].free_list_next = i + 1;
   }
@@ -78,6 +80,8 @@ void LightningAllocator::Initialize() {
   for (int i = 0; i < HASHMAP_SIZE; i++) {
     store_header_->hashmap.hash_entries[i].object_list = -1;
   }
+
+  UNLOCK;
 }
 
 void *LightningAllocator::GetRoot() {

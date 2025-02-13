@@ -9,7 +9,7 @@ private:
 public:
   LightningAllocator(const char *path, size_t size);
 
-  void Initialize();
+  void Initialize(uint64_t id);
   void *GetRoot();
   void SetRoot(void *pointer);
   sm_offset PointerToOffset(void *pointer);
