@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <csignal>
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
@@ -18,6 +19,11 @@
 #include "memory.h"
 #include "object_log.h"
 #include "store.h"
+
+void signal_handler(int sig_number) {
+  std::cout << "Capture Ctrl+C" << std::endl;
+  exit(0);
+}
 
 const char *name = "lightning";
 
@@ -114,53 +120,6 @@ LightningStore::LightningStore(const char *path, const std::string &unix_socket,
   for (int i = 0; i < HASHMAP_SIZE; i++) {
     store_header_->hashmap.hash_entries[i].object_list = -1;
   }
-}
-
-#define LOCK                                                                   \
-  while (!__sync_bool_compare_and_swap(&store_header_->lock_flag, 0, id)) {    \
-    nanosleep((const struct timespec[]){{0, 0L}}, NULL);                       \
-  }
-
-#define UNLOCK                                                                 \
-  std::atomic_thread_fence(std::memory_order_release);                         \
-  store_header_->lock_flag = 0
-
-void *LightningStore::GetRoot() {
-  sm_offset root = store_header_->root.load();
-  if (root == 0) {
-    return nullptr;
-  } else {
-    return OffsetToPointer(root);
-  }
-}
-
-void LightningStore::SetRoot(void *pointer) {
-  store_header_->root.store(PointerToOffset(pointer));
-}
-
-sm_offset LightningStore::PointerToOffset(void *pointer) {
-  return ((sm_offset)pointer - (sm_offset)store_header_);
-}
-
-void *LightningStore::OffsetToPointer(sm_offset offset) {
-  return (void *)((sm_offset)store_header_ + offset);
-}
-
-sm_offset LightningStore::Malloc(uint64_t id, size_t size) {
-  LOCK;
-  allocator_->BeginTx();
-  sm_offset pointer = allocator_->MallocShared(size);
-  allocator_->CommitTx();
-  UNLOCK;
-  return pointer;
-}
-
-void LightningStore::Free(uint64_t id, sm_offset offset) {
-  LOCK;
-  allocator_->BeginTx();
-  allocator_->FreeShared(offset);
-  allocator_->CommitTx();
-  UNLOCK;
 }
 
 int64_t LightningStore::find_object(uint64_t object_id) {
@@ -553,4 +512,16 @@ void LightningStore::Run() {
   std::thread listener_thread = std::thread(&LightningStore::listener, this);
   listener_thread.join();
   monitor_thread.join();
+}
+
+int main() {
+  if (signal(SIGINT, signal_handler) == SIG_ERR) {
+    std::cerr << "cannot register signal handler!" << std::endl;
+    exit(-1);
+  }
+
+  LightningStore store("/tmp/lightning", 1024 * 1024 * 1024);
+  store.Run();
+
+  return 0;
 }
