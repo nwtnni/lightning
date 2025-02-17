@@ -21,21 +21,9 @@
 
 #define UNLOCK store_header_->lock_flag.store(0, std::memory_order_release)
 
-LightningAllocator::LightningAllocator(const char *path, size_t size)
+LightningAllocator::LightningAllocator(char *address, size_t size)
     : size_(size) {
-  auto fd = shm_open(path, O_CREAT | O_RDWR, 0666);
-  int status = ftruncate(fd, size);
-
-  if (status < 0) {
-    perror("cannot ftruncate");
-    exit(-1);
-  }
-  store_header_ = (LightningStoreHeader *)mmap(
-      nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (store_header_ == (LightningStoreHeader *)-1) {
-    perror("mmap failed");
-    exit(-1);
-  }
+  store_header_ = (LightningStoreHeader *)address;
 
   size_t object_log_size = sizeof(LogObjectEntry) * OBJECT_LOG_SIZE;
   auto disk = new UndoLogDisk(1024 * 1024 * 10, (uint8_t *)store_header_,

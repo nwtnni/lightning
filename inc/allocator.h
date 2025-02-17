@@ -7,7 +7,7 @@ private:
   size_t size_;
 
 public:
-  LightningAllocator(const char *path, size_t size);
+  LightningAllocator(char *address, size_t size);
 
   void Initialize(uint64_t id);
   void *GetRoot();
