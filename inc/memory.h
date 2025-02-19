@@ -8,7 +8,7 @@
 #define MAXIMUM_BLOCK_SIZE_LOG 30
 #define HASHMAP_SIZE 65536
 
-#define MAX_NUM_OBJECTS 100000
+#define MAX_NUM_OBJECTS 10000000
 
 typedef int64_t sm_offset;
 
