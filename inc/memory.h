@@ -5,7 +5,7 @@
 #include <semaphore.h>
 
 #define MINIMAL_BLOCK_SIZE_LOG 10
-#define MAXIMUM_BLOCK_SIZE_LOG 30
+#define MAXIMUM_BLOCK_SIZE_LOG 39
 #define HASHMAP_SIZE 65536
 
 #define MAX_NUM_OBJECTS 10000000
@@ -19,7 +19,7 @@ struct MemoryEntry {
   size_t size;
   int64_t prev;
   int64_t next;
-  int64_t buddy[32];
+  int64_t buddy[40];
 };
 
 struct MemoryHeader {
@@ -27,7 +27,7 @@ struct MemoryHeader {
 };
 
 struct FreeList {
-  int64_t free_list_head[32];
+  int64_t free_list_head[40];
 };
 
 struct ObjectEntry {
