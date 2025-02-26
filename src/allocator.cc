@@ -44,7 +44,7 @@ void LightningAllocator::Initialize(uint64_t id) {
   }
   store_header_->object_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
 
-  int num_mpk_pages = sizeof(LightningStoreHeader) / 4096 + 1;
+  int64_t num_mpk_pages = sizeof(LightningStoreHeader) / 4096 + 1;
   int64_t secure_memory_size = num_mpk_pages * 4096;
 
   allocator_->Init(secure_memory_size, size_ - secure_memory_size);
