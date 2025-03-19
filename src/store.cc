@@ -99,12 +99,12 @@ LightningStore::LightningStore(const char *path, const std::string &unix_socket,
 
   store_header_ = new (store_header_) LightningStoreHeader;
 
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
+  for (int64_t i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
     store_header_->memory_entries[i].free_list_next = i + 1;
   }
   store_header_->memory_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
 
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
+  for (int64_t i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
     store_header_->object_entries[i].free_list_next = i + 1;
   }
   store_header_->object_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;

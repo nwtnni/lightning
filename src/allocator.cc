@@ -34,12 +34,12 @@ LightningAllocator::LightningAllocator(char *address, size_t size)
 void LightningAllocator::Initialize(uint64_t id) {
   LOCK;
 
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
+  for (int64_t i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
     store_header_->memory_entries[i].free_list_next = i + 1;
   }
   store_header_->memory_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
 
-  for (int i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
+  for (int64_t i = 0; i < MAX_NUM_OBJECTS - 1; i++) {
     store_header_->object_entries[i].free_list_next = i + 1;
   }
   store_header_->object_entries[MAX_NUM_OBJECTS - 1].free_list_next = -1;
